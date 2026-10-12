@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090b14">
+  <meta name="description" content="Lucky is a privacy-focused local AI assistant built with Python, Ollama, and prompt engineering.">
+  <title>Lucky — Your Local AI Assistant</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090b14;
+      --panel: rgba(18, 23, 42, .78);
+      --panel-solid: #11162a;
+      --text: #f4f6ff;
+      --muted: #a7afc8;
+      --line: rgba(169, 184, 255, .16);
+      --purple: #a78bfa;
+      --blue: #67e8f9;
+      --green: #86efac;
+      --radius: 22px;
+      --max: 1120px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; background:
+        radial-gradient(ellipse at 12% 0%, rgba(124, 58, 237, .20), transparent 36rem),
+        radial-gradient(ellipse at 90% 20%, rgba(14, 165, 233, .13), transparent 34rem),
+        var(--bg);
+      color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    .wrap { width: min(var(--max), calc(100% - 40px)); margin: 0 auto; }
+    .nav { position: sticky; top: 0; z-index: 20; backdrop-filter: blur(18px); background: rgba(9,11,20,.76); border-bottom: 1px solid var(--line); }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; min-height: 72px; gap: 24px; }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; letter-spacing: -.03em; }
+    .logo { display: grid; place-items: center; width: 39px; height: 39px; border-radius: 13px; color: #0b1020; background: linear-gradient(135deg, var(--blue), var(--purple)); box-shadow: 0 8px 30px rgba(167,139,250,.22); font-size: 21px; }
+    .brand small { display: block; color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; }
+    .links { display: flex; align-items: center; gap: 25px; color: var(--muted); font-size: 13px; }
+    .links a:hover, .text-link:hover { color: var(--blue); }
+    .button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 12px 17px; border-radius: 12px; font-size: 14px; font-weight: 750; border: 1px solid var(--line); transition: transform .2s ease, border-color .2s ease, background .2s ease; cursor: pointer; }
+    .button:hover { transform: translateY(-2px); border-color: rgba(103,232,249,.5); }
+    .primary { background: linear-gradient(120deg, #a78bfa, #67e8f9); color: #09101c; border: 0; }
+    .secondary { background: rgba(255,255,255,.035); }
+    .hero { padding: 94px 0 72px; }
+    .hero-grid { display: grid; grid-template-columns: 1.08fr .92fr; gap: 56px; align-items: center; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 9px; border: 1px solid var(--line); padding: 7px 12px; border-radius: 999px; color: #d4d8f5; background: rgba(255,255,255,.035); font-size: 12px; font-weight: 700; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 14px var(--green); }
+    h1 { font-size: clamp(44px, 6.3vw, 76px); letter-spacing: -.065em; line-height: 1.04; margin: 22px 0 22px; }
+    .gradient-text { background: linear-gradient(100deg, #c4b5fd, #67e8f9 72%); color: transparent; background-clip: text; -webkit-background-clip: text; }
+    .lead { max-width: 610px; color: var(--muted); font-size: 18px; }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin: 28px 0 23px; }
+    .micro { color: #8e98b7; font-size: 12px; }
+    .terminal { border: 1px solid rgba(169,184,255,.22); border-radius: 20px; background: linear-gradient(145deg, rgba(21,27,49,.96), rgba(12,16,31,.97)); box-shadow: 0 25px 80px rgba(0,0,0,.35); overflow: hidden; transform: perspective(900px) rotateY(-3deg) rotateX(1deg); }
+    .terminal-head { display: flex; align-items: center; gap: 7px; padding: 15px 17px; border-bottom: 1px solid var(--line); color: #8792b3; font: 12px ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .traffic { width: 8px; height: 8px; border-radius: 50%; background: #fca5a5; }
+    .traffic:nth-child(2) { background: #fcd34d; } .traffic:nth-child(3) { background: #86efac; }
+    .terminal-title { margin-left: 8px; }
+    .terminal-body { padding: 23px; font: 13px/1.9 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .line { margin-bottom: 15px; }
+    .prompt { color: var(--blue); } .muted-code { color: #818bad; } .assistant-name { color: #c4b5fd; }
+    .answer { border-left: 2px solid var(--purple); padding-left: 13px; color: #d9def2; margin: 8px 0 18px; }
+    .cursor { display: inline-block; width: 7px; height: 15px; background: var(--blue); vertical-align: middle; animation: blink 1s steps(2, start) infinite; }
+    @keyframes blink { to { visibility: hidden; } }
+    section { padding: 76px 0; }
+    .section-top { max-width: 690px; margin-bottom: 30px; }
+    .kicker { color: var(--blue); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .15em; }
+    h2 { margin: 9px 0 12px; font-size: clamp(30px, 4vw, 43px); line-height: 1.15; letter-spacing: -.045em; }
+    .section-top p, .muted { color: var(--muted); }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .card { padding: 23px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); }
+    .icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; background: rgba(167,139,250,.12); color: var(--purple); font-size: 21px; margin-bottom: 17px; }
+    .card h3 { margin: 0 0 8px; font-size: 17px; }
+    .card p { margin: 0; color: var(--muted); font-size: 14px; }
+    .feature-note { margin-top: 18px; padding: 17px 20px; border: 1px solid rgba(103,232,249,.2); border-radius: 15px; color: #c4cce4; background: rgba(103,232,249,.045); font-size: 13px; }
+    .architecture { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; align-items: stretch; }
+    .step { border: 1px solid var(--line); border-radius: 15px; padding: 17px 12px; text-align: center; background: rgba(255,255,255,.025); }
+    .step strong { display: block; font-size: 13px; }
+    .step span { display: block; color: var(--muted); font-size: 11px; margin-top: 5px; }
+    .step-num { color: var(--blue); font: 12px ui-monospace, monospace; margin-bottom: 8px; }
+    .prompt-panel { display: grid; grid-template-columns: .9fr 1.1fr; gap: 30px; align-items: center; }
+    .prompt-demo { background: #0c1020; border: 1px solid var(--line); border-radius: 18px; padding: 22px; font: 13px/1.8 ui-monospace, Consolas, monospace; color: #d6ddf6; }
+    .prompt-demo .label { color: var(--purple); }
+    .prompt-demo .value { color: var(--blue); }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .tag { font-size: 12px; color: #d8dcf2; border: 1px solid var(--line); padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,.025); }
+    .timeline { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .release { position: relative; padding: 24px; border: 1px solid var(--line); border-radius: 20px; background: var(--panel); }
+    .release.active { border-color: rgba(134,239,172,.35); }
+    .release-top { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+    .version { font: 12px ui-monospace, monospace; color: var(--blue); }
+    .status { font-size: 11px; color: var(--green); border: 1px solid rgba(134,239,172,.25); padding: 4px 8px; border-radius: 999px; }
+    .release h3 { margin: 12px 0 8px; font-size: 19px; }
+    .release p, .release li { color: var(--muted); font-size: 13px; }
+    .release ul { padding-left: 18px; margin-bottom: 0; }
+    .stack { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+    .tech { text-align: center; padding: 18px 10px; border: 1px solid var(--line); border-radius: 15px; background: rgba(255,255,255,.025); }
+    .tech b { display: block; font-size: 14px; } .tech span { color: var(--muted); font-size: 11px; }
+    .cta { padding: 34px; border: 1px solid rgba(167,139,250,.28); border-radius: 24px; background: radial-gradient(ellipse at top right, rgba(103,232,249,.1), transparent 45%), rgba(167,139,250,.055); display: flex; align-items: center; justify-content: space-between; gap: 25px; }
+    .cta h2 { font-size: 30px; }
+    .footer { border-top: 1px solid var(--line); padding: 27px 0 35px; color: var(--muted); font-size: 12px; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+    .text-link { color: #d5daf1; border-bottom: 1px solid rgba(213,218,241,.28); }
+    @media (max-width: 850px) {
+      .hero-grid, .prompt-panel { grid-template-columns: 1fr; }
+      .hero { padding-top: 65px; }
+      .terminal { transform: none; }
+      .grid-3 { grid-template-columns: 1fr 1fr; }
+      .stack { grid-template-columns: repeat(3, 1fr); }
+      .architecture { grid-template-columns: repeat(3, 1fr); }
+      .links { gap: 13px; }
+    }
+    @media (max-width: 580px) {
+      .wrap { width: min(100% - 28px, var(--max)); }
+      .links a:not(.button) { display: none; }
+      .grid-3, .timeline { grid-template-columns: 1fr; }
+      .architecture { grid-template-columns: 1fr 1fr; }
+      .stack { grid-template-columns: 1fr 1fr; }
+      .hero { padding: 54px 0 48px; }
+      section { padding: 54px 0; }
+      .cta { align-items: flex-start; flex-direction: column; padding: 25px; }
+      .terminal-body { padding: 17px; font-size: 11px; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#home" aria-label="Lucky home">
+        <span class="logo">✦</span>
+        <span>lucky <small>local AI assistant</small></span>
+      </a>
+      <nav class="links" aria-label="Main navigation">
+        <a href="#features">Features</a>
+        <a href="#prompting">Prompt engineering</a>
+        <a href="#roadmap">Roadmap</a>
+        <a class="button secondary" href="https://github.com/srinivas556/lucky-local-ai-assistant" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="home">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <div class="eyebrow"><span class="dot"></span> VERSION 0.1.0 · TEXT-BASED RELEASE</div>
+          <h1>Your own AI.<br><span class="gradient-text">Your own rules.</span></h1>
+          <p class="lead">Meet Lucky — a privacy-focused local AI assistant built with Python and Ollama. A hands-on journey into prompt engineering, local LLMs, and building AI systems one iteration at a time.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="https://github.com/srinivas556/lucky-local-ai-assistant" target="_blank" rel="noopener noreferrer">Explore the code <span aria-hidden="true">↗</span></a>
+            <a class="button secondary" href="#how-it-works">How it works ↓</a>
+          </div>
+          <p class="micro">Local inference · Python · Ollama · Qwen3</p>
+        </div>
+        <div class="terminal" aria-label="Illustration of a Lucky terminal conversation">
+          <div class="terminal-head"><span class="traffic"></span><span class="traffic"></span><span class="traffic"></span><span class="terminal-title">lucky — local session</span></div>
+          <div class="terminal-body">
+            <div class="line"><span class="muted-code">~</span> <span class="prompt">python -m src.main</span></div>
+            <div class="line"><span class="assistant-name">Lucky v0.1.0</span> <span class="muted-code">initialized</span></div>
+            <div class="line"><span class="prompt">You:</span> Explain prompt engineering simply.</div>
+            <div class="line assistant-name">Lucky:</div>
+            <div class="answer">Prompt engineering is the practice of shaping instructions and context so an AI model is more likely to produce useful, relevant responses.</div>
+            <div class="line"><span class="prompt">You:</span> Make it practical.</div>
+            <div class="line assistant-name">Lucky:</div>
+            <div class="answer">Be specific about the task, provide useful context, and state the format you want.</div>
+            <span class="cursor" aria-hidden="true"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="wrap">
+        <div class="section-top">
+          <div class="kicker">Built with intent</div>
+          <h2>Small foundation.<br><span class="gradient-text">Big learning journey.</span></h2>
+          <p>Lucky starts with the essentials: a local model, a reusable system prompt, and a simple conversation loop. Each part is a building block for future experiments.</p>
+        </div>
+        <div class="grid-3">
+          <article class="card"><div class="icon">⌘</div><h3>Local LLM integration</h3><p>Connect Python to a language model served locally by Ollama, without depending on a cloud LLM API for inference.</p></article>
+          <article class="card"><div class="icon">✳</div><h3>Prompt engineering</h3><p>Keep the assistant's system instructions in a separate file, making behavior easier to inspect, refine, and evaluate.</p></article>
+          <article class="card"><div class="icon">↔</div><h3>Interactive text chat</h3><p>Ask questions from the terminal and receive responses from the locally configured model.</p></article>
+          <article class="card"><div class="icon">⚙</div><h3>Configurable setup</h3><p>Choose a model and configure the Ollama server URL using environment-based settings.</p></article>
+          <article class="card"><div class="icon">⌁</div><h3>Modular Python</h3><p>Separate the assistant, configuration, LLM client, prompts, tools, and memory into distinct modules.</p></article>
+          <article class="card"><div class="icon">◈</div><h3>Versioned development</h3><p>Build in small, understandable milestones, with each release documenting what works and what comes next.</p></article>
+        </div>
+        <div class="feature-note"><strong>Scope note:</strong> This website describes v0.1.0 as the text-based release. Voice interaction, tool execution, persistent memory, and computer automation are roadmap items until implemented and tested in a later release.</div>
+      </div>
+    </section>
+
+    <section id="how-it-works">
+      <div class="wrap">
+        <div class="section-top">
+          <div class="kicker">Under the hood</div>
+          <h2>From your prompt to a response.</h2>
+          <p>Lucky connects a lightweight Python interface to a local model runtime. The system prompt provides the assistant's baseline instructions.</p>
+        </div>
+        <div class="architecture">
+          <div class="step"><div class="step-num">01 / INPUT</div><strong>Your question</strong><span>Terminal text</span></div>
+          <div class="step"><div class="step-num">02 / GUIDE</div><strong>System prompt</strong><span>Behavior instructions</span></div>
+          <div class="step"><div class="step-num">03 / CONNECT</div><strong>Python client</strong><span>Ollama API</span></div>
+          <div class="step"><div class="step-num">04 / GENERATE</div><strong>Local model</strong><span>Qwen3 via Ollama</span></div>
+          <div class="step"><div class="step-num">05 / OUTPUT</div><strong>Response</strong><span>Back to terminal</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="prompting">
+      <div class="wrap prompt-panel">
+        <div>
+          <div class="kicker">A key learning area</div>
+          <h2>Prompt engineering is more than asking a question.</h2>
+          <p class="muted">The system prompt sets a default role and response guidelines. A major goal for future versions is to evaluate how different instructions affect clarity, consistency, and constraint-following.</p>
+          <div class="tag-row"><span class="tag">System prompts</span><span class="tag">Instruction clarity</span><span class="tag">Context</span><span class="tag">Evaluation</span></div>
+        </div>
+        <div class="prompt-demo">
+          <div class="label">system_prompt.txt</div>
+          <br>
+          <span class="value">ROLE</span><br>
+          You are Lucky, a local AI personal assistant.<br><br>
+          <span class="value">STYLE</span><br>
+          Be clear, helpful, and practical.<br><br>
+          <span class="value">RELIABILITY</span><br>
+          Do not claim actions were performed unless a tool actually performed them.<br><br>
+          <span class="value">DESIGN PRINCIPLE</span><br>
+          Keep instructions separate from application logic.
+        </div>
+      </div>
+    </section>
+
+    <section id="roadmap">
+      <div class="wrap">
+        <div class="section-top">
+          <div class="kicker">The release journey</div>
+          <h2>Built one milestone at a time.</h2>
+          <p>Lucky is a work in progress. The current release is the foundation; the roadmap describes intended future work, not features promised to be available today.</p>
+        </div>
+        <div class="timeline">
+          <article class="release active">
+            <div class="release-top"><span class="version">VERSION 0.1.0</span><span class="status">Current foundation</span></div>
+            <h3>Text-based local AI</h3>
+            <p>The first release connects a Python command-line interface to a locally running LLM.</p>
+            <ul><li>Ollama integration</li><li>External system prompt</li><li>Text-based interaction</li></ul>
+          </article>
+          <article class="release">
+            <div class="release-top"><span class="version">VERSION 0.2.0</span><span class="status" style="color:#c4b5fd;border-color:rgba(196,181,253,.25)">Planned</span></div>
+            <h3>Talk &amp; speak</h3>
+            <p>Add a voice interface around the local assistant.</p>
+            <ul><li>Speech-to-text</li><li>Spoken responses</li><li>Voice interaction testing</li></ul>
+          </article>
+          <article class="release">
+            <div class="release-top"><span class="version">FUTURE MILESTONES</span></div>
+            <h3>Evaluate &amp; extend</h3>
+            <p>Measure behavior and make the assistant more capable in controlled steps.</p>
+            <ul><li>Prompt evaluation</li><li>Tool calling</li><li>Persistent local memory</li></ul>
+          </article>
+          <article class="release">
+            <div class="release-top"><span class="version">LONG-TERM DIRECTION</span></div>
+            <h3>Useful, safer automation</h3>
+            <p>Explore integrations that take actions carefully, with clear boundaries and user confirmation.</p>
+            <ul><li>Safe computer automation</li><li>Action confirmation</li><li>Transparent results</li></ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="stack">
+      <div class="wrap">
+        <div class="section-top">
+          <div class="kicker">The toolkit</div>
+          <h2>Simple tools. Real foundations.</h2>
+        </div>
+        <div class="stack">
+          <div class="tech"><b>Python</b><span>Application logic</span></div>
+          <div class="tech"><b>Ollama</b><span>Local model runtime</span></div>
+          <div class="tech"><b>Qwen3</b><span>Language model</span></div>
+          <div class="tech"><b>Prompt design</b><span>Model instructions</span></div>
+          <div class="tech"><b>GitHub</b><span>Version control</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="cta">
+          <div>
+            <div class="kicker">Explore the project</div>
+            <h2>Curious about how Lucky is built?</h2>
+            <p class="muted" style="margin-bottom:0">Explore the source, follow the releases, and see how the project evolves.</p>
+          </div>
+          <a class="button primary" href="https://github.com/srinivas556/lucky-local-ai-assistant" target="_blank" rel="noopener noreferrer">Open GitHub repository ↗</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <span>© <span id="year"></span> Lucky · A local AI assistant project</span>
+      <span>Built with Python, curiosity, and a focus on prompt engineering.</span>
+      <a class="text-link" href="https://github.com/srinivas556/lucky-local-ai-assistant" target="_blank" rel="noopener noreferrer">Source code ↗</a>
+    </div>
+  </footer>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
