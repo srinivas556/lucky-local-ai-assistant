@@ -168,9 +168,9 @@ ollama pull qwen3:0.6b
 
 ```bash
 
-git clone <YOUR\_GITHUB\_REPOSITORY\_URL>
+git clone https://github.com/srinivas556/lucky-local-ai-assistant.git
 
-cd lucky
+cd lucky-local-ai-assistant
 
 ```
 
@@ -238,7 +238,7 @@ Type your question and press Enter. Enter `exit` to quit.
 
 ```text
 
-lucky/
+lucky-local-ai-assistant/
 
 ├── src/
 
@@ -255,6 +255,8 @@ lucky/
 │   ├── tools/
 
 │   └── memory/
+
+├── docs/
 
 ├── evaluation/
 

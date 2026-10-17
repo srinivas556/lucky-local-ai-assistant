@@ -1,0 +1,38 @@
+LUCKY GITHUB PAGES - QUICK SETUP
+
+1. Extract the project ZIP, if you are using one.
+2. Ensure the `docs` folder is inside your local repository:
+
+   `E:\jarvis\lucky\docs\index.html`
+
+3. Open CMD and run:
+
+   ```cmd
+   cd /d E:\jarvis\lucky
+   git status --short
+   git add docs
+   git commit -m "Add Lucky project website for GitHub Pages"
+   git push
+   ```
+
+4. Open the GitHub Pages settings:
+
+   https://github.com/srinivas556/lucky-local-ai-assistant/settings/pages
+
+5. Under **Build and deployment**, choose:
+
+   - Source: Deploy from a branch
+   - Branch: `main`
+   - Folder: `/docs`
+
+   Click **Save**.
+
+6. After deployment finishes, visit:
+
+   https://srinivas556.github.io/lucky-local-ai-assistant/
+
+## Notes
+
+- This is a static portfolio website. It does not run the Python assistant or Ollama in the browser.
+- The page uses inline CSS and JavaScript, so no npm or build step is required.
+- Voice interaction and advanced features should be described according to their actual implementation status.
